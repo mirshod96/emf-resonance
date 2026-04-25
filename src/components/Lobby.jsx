@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 import { Activity } from 'lucide-react';
 
 export const Lobby = () => {
-  const { phase, joinRoom, players, myPlayer, errorMessage } = useSocket();
+  const { phase, joinRoom, leaveRoom, players, myPlayer, errorMessage } = useSocket();
   const [name, setName] = useState('');
   const [code, setCode] = useState('');
 
