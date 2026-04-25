@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { io } from 'socket.io-client';
-import { ShieldAlert, Users, Zap, CheckCircle, Eye } from 'lucide-react';
+import { ShieldAlert, Users, Zap, CheckCircle, Eye, LogOut } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useSocket } from '../context/SocketContext';
 
 export const SpectatorScreen = () => {
-  const { roomCode } = useSocket();
+  const { roomCode, leaveRoom } = useSocket();
   const [rooms, setRooms] = useState({});
   const [isConnected, setIsConnected] = useState(false);
 
@@ -62,11 +62,19 @@ export const SpectatorScreen = () => {
               <p className="text-cybermed-teal/60 font-medium uppercase tracking-widest text-xs mt-1">Observing Active Medical Boards</p>
             </div>
           </div>
-          <div className="flex flex-col items-end gap-1">
-            <span className="text-xs font-bold uppercase tracking-widest text-cybermed-slate">Your Team:</span>
-            <span className="text-sm font-black uppercase tracking-widest text-cybermed-cyan bg-cybermed-cyan/10 px-3 py-1 rounded border border-cybermed-cyan/30">
-              {roomCode || 'UNKNOWN'}
-            </span>
+          <div className="flex flex-col items-end gap-3">
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-bold uppercase tracking-widest text-cybermed-slate">Your Team:</span>
+              <span className="text-sm font-black uppercase tracking-widest text-cybermed-cyan bg-cybermed-cyan/10 px-3 py-1 rounded border border-cybermed-cyan/30">
+                {roomCode || 'UNKNOWN'}
+              </span>
+            </div>
+            <button 
+              onClick={leaveRoom}
+              className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest bg-red-900/30 text-red-400 border border-red-500/50 px-3 py-2 rounded-lg hover:bg-red-500 hover:text-white transition-all shadow-[0_0_15px_rgba(239,68,68,0.2)]"
+            >
+              <LogOut className="w-3 h-3" /> END GAME
+            </button>
           </div>
         </header>
 
