@@ -5,9 +5,10 @@ const SocketContext = createContext();
 
 export const useSocket = () => useContext(SocketContext);
 
-// Connect dynamically to the same URL that serves the frontend.
-// When using localtunnel, this will automatically use the correct public domain.
-const socket = io({ autoConnect: false });
+// Connect dynamically. Locally it connects to the hosting domain (localtunnel).
+// In production (Vercel), it will use the VITE_BACKEND_URL environment variable.
+const SOCKET_URL = import.meta.env.VITE_BACKEND_URL || undefined;
+const socket = io(SOCKET_URL, { autoConnect: false });
 
 export const SocketProvider = ({ children }) => {
   const [phase, setPhase] = useState('lobby'); // 'lobby', 'lobby-waiting', 'solo', 'group'
