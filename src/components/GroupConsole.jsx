@@ -32,7 +32,7 @@ export const GroupConsole = () => {
   };
 
   return (
-    <div className="min-h-screen bg-cybermed-dark text-white p-6 md:p-12 flex flex-col items-center">
+    <div className="min-h-screen bg-cybermed-dark text-white p-4 md:p-12 flex flex-col items-center overflow-y-auto overflow-x-hidden">
       <motion.div 
         initial={{ scale: 1.1, filter: "brightness(2) contrast(2)" }}
         animate={{ scale: 1, filter: "brightness(1) contrast(1)" }}

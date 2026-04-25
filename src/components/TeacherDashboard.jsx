@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { io } from 'socket.io-client';
-import { ShieldAlert, Users, Zap, CheckCircle, Clock } from 'lucide-react';
+import { ShieldAlert, Users, Zap, CheckCircle, Clock, Activity } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 export const TeacherDashboard = () => {
