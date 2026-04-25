@@ -196,32 +196,21 @@ io.on('connection', (socket) => {
         phase: room.phase,
         patientState: room.patientState
       });
-  // 6. Leave Room / Start Over
+  // 6. Leave Room / Start Over (Disband the entire room)
   socket.on('leave_room', () => {
     if (socket.roomId && rooms[socket.roomId]) {
-      const room = rooms[socket.roomId];
-      const playerIndex = room.players.findIndex(p => p.socketId === socket.id || p.id === socket.id);
+      const roomCode = socket.roomId;
       
-      if (playerIndex !== -1) {
-        const removedPlayer = room.players.splice(playerIndex, 1)[0];
-        if (removedPlayer && removedPlayer.role) {
-          room.availableRoles.push(removedPlayer.role);
-          console.log(`[Socket] ${removedPlayer.name} left. Freed role ${removedPlayer.role}`);
-        }
-
-        if (room.players.length === 0) {
-          delete rooms[socket.roomId];
-          console.log(`[Socket] Room ${socket.roomId} is empty and deleted.`);
-        } else {
-          io.to(socket.roomId).emit('sync_room', {
-            players: room.players,
-            phase: room.phase,
-            patientState: room.patientState
-          });
-        }
-      }
+      console.log(`[Socket] ${socket.id} triggered room disband for ${roomCode}`);
       
-      socket.leave(socket.roomId);
+      // Tell everyone in the room to leave
+      io.to(roomCode).emit('room_destroyed');
+      
+      // Delete the room from memory
+      delete rooms[roomCode];
+      
+      // The individual socket leaves
+      socket.leave(roomCode);
       socket.roomId = null;
       socket.playerId = null;
     }

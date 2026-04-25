@@ -60,10 +60,21 @@ export const SocketProvider = ({ children }) => {
       setErrorMessage(message);
     });
 
+    socket.on('room_destroyed', () => {
+      sessionStorage.removeItem('emf_session');
+      setRoomCode('');
+      setMyPlayer(null);
+      setPlayers([]);
+      setPhase('lobby');
+      setPatientState({ frequency: 50, modality: '', isAuthorized: false });
+      setErrorMessage('Команда была распущена, так как один из участников покинул игру.');
+    });
+
     return () => {
       socket.off('join_success');
       socket.off('sync_room');
       socket.off('room_full_error');
+      socket.off('room_destroyed');
     };
   }, []);
 
