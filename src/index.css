@@ -4,6 +4,6 @@
 
 @layer base {
   body {
-    @apply bg-cybermed-dark text-white font-sans overflow-hidden select-none;
+    @apply bg-cybermed-dark text-white font-sans overflow-x-hidden select-none;
   }
 }
