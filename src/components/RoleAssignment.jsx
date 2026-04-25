@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { useSocket } from '../context/SocketContext';
 import { motion } from 'framer-motion';
-import { ShieldAlert, Zap, Stethoscope, CheckCircle } from 'lucide-react';
+import { ShieldAlert, Zap, Stethoscope, CheckCircle, FileText } from 'lucide-react';
 
 export const RoleAssignment = () => {
-  const { myPlayer, completeSoloTask, leaveRoom } = useSocket();
+  const { myPlayer, completeSoloTask, leaveRoom, clinicalCase } = useSocket();
   const [completed, setCompleted] = useState(false);
 
   const [selectedModality, setSelectedModality] = useState(null);
@@ -20,12 +20,12 @@ export const RoleAssignment = () => {
       case 'Biophysicist':
         return (
           <div className="space-y-6">
-            <p className="text-cybermed-teal">Task: Identify mechanism of action and calibrate base frequency.</p>
+            <p className="text-cybermed-teal font-bold uppercase tracking-widest">Task: Identify mechanism of action & calibrate depth.</p>
             <div className="bg-black/40 p-4 rounded-xl border border-cybermed-slate space-y-4">
-              <label className="text-xs uppercase tracking-wider text-cybermed-cyan">Target Frequency Range</label>
+              <label className="text-xs uppercase tracking-wider text-cybermed-cyan">Target Freq (Penetration Depth)</label>
               <input type="range" className="w-full accent-cybermed-cyan" min="0" max="100" defaultValue="50"/>
-              <div className="flex justify-between text-xs text-cybermed-teal">
-                <span>0 Hz</span><span>500 MHz</span><span>3 GHz</span>
+              <div className="flex justify-between text-[10px] text-cybermed-teal/70 font-mono">
+                <span>Low Hz (Deep)</span><span>High MHz (Superficial)</span>
               </div>
             </div>
           </div>
@@ -33,16 +33,16 @@ export const RoleAssignment = () => {
       case 'Clinical Strategist':
         return (
           <div className="space-y-6">
-            <p className="text-cybermed-teal">Task: Classify and select the correct therapeutic modality based on pathology.</p>
+            <p className="text-cybermed-teal font-bold uppercase tracking-widest">Task: Classify pathology & select modality.</p>
             <div className="grid grid-cols-1 gap-3">
-              {['UHF Therapy', 'Microwave Therapy', 'Magnetotherapy'].map(mod => (
+              {['UHF Therapy', 'Microwave Therapy', 'Magnetotherapy', 'Electrotherapy'].map(mod => (
                 <button 
                   key={mod} 
                   onClick={() => setSelectedModality(mod)}
                   className={`border p-3 rounded-xl transition-colors text-left pl-4 w-full ${
                     selectedModality === mod 
                       ? 'bg-cybermed-teal/30 border-cybermed-cyan text-white shadow-[0_0_10px_rgba(6,182,212,0.3)]' 
-                      : 'bg-black/40 border-cybermed-slate hover:border-cybermed-cyan'
+                      : 'bg-black/40 border-cybermed-slate hover:border-cybermed-cyan/50 text-white/70'
                   }`}
                 >
                   {mod}
@@ -54,28 +54,28 @@ export const RoleAssignment = () => {
       case 'Safety Expert':
         return (
           <div className="space-y-6">
-            <p className="text-cybermed-teal">Task: Screen patient history for absolute and relative contraindications.</p>
+            <p className="text-cybermed-teal font-bold uppercase tracking-widest">Task: Screen patient history for contraindications.</p>
             <div className="space-y-3">
               {[
-                { label: 'Pacemaker present' },
-                { label: 'Acute Inflammation' },
-                { label: 'Mild muscle pain' }
+                { label: 'Check for Pacemaker/Implants' },
+                { label: 'Check for Acute Inflammation' },
+                { label: 'Check for Oncological History' }
               ].map((item, idx) => (
                 <div key={idx} className="flex items-center justify-between bg-black/40 p-3 rounded-xl border border-cybermed-slate">
-                  <span className="text-sm">{item.label}</span>
+                  <span className="text-xs text-white/80">{item.label}</span>
                   <div className="flex space-x-2">
                     <button 
                       onClick={() => setScreenedItems({...screenedItems, [idx]: 'risk'})}
-                      className={`text-xs px-3 py-1 border rounded transition-colors ${
-                        screenedItems[idx] === 'risk' ? 'bg-red-500 text-white border-red-500' : 'border-red-500/50 text-red-500 hover:bg-red-500 hover:text-white'
+                      className={`text-[10px] uppercase font-bold px-3 py-1 border rounded transition-colors ${
+                        screenedItems[idx] === 'risk' ? 'bg-red-500 text-white border-red-500' : 'border-red-500/50 text-red-500 hover:bg-red-500/20'
                       }`}
                     >
                       Risk
                     </button>
                     <button 
                       onClick={() => setScreenedItems({...screenedItems, [idx]: 'clear'})}
-                      className={`text-xs px-3 py-1 border rounded transition-colors ${
-                        screenedItems[idx] === 'clear' ? 'bg-green-500 text-white border-green-500' : 'border-green-500/50 text-green-500 hover:bg-green-500 hover:text-white'
+                      className={`text-[10px] uppercase font-bold px-3 py-1 border rounded transition-colors ${
+                        screenedItems[idx] === 'clear' ? 'bg-green-500 text-white border-green-500' : 'border-green-500/50 text-green-500 hover:bg-green-500/20'
                       }`}
                     >
                       Clear
@@ -93,27 +93,45 @@ export const RoleAssignment = () => {
 
   const getRoleIcon = () => {
     switch (myPlayer?.role) {
-      case 'Biophysicist': return <Zap className="w-12 h-12 text-cybermed-cyan mb-4" />;
-      case 'Clinical Strategist': return <Stethoscope className="w-12 h-12 text-cybermed-cyan mb-4" />;
-      case 'Safety Expert': return <ShieldAlert className="w-12 h-12 text-cybermed-cyan mb-4" />;
+      case 'Biophysicist': return <Zap className="w-10 h-10 text-cybermed-cyan mb-2" />;
+      case 'Clinical Strategist': return <Stethoscope className="w-10 h-10 text-cybermed-cyan mb-2" />;
+      case 'Safety Expert': return <ShieldAlert className="w-10 h-10 text-cybermed-cyan mb-2" />;
       default: return null;
     }
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-cybermed-dark text-white p-6 relative">
+    <div className="flex items-center justify-center min-h-screen bg-cybermed-dark text-white p-4 md:p-6 relative">
       <motion.div
         initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
-        className="w-full max-w-lg glass-panel bg-cybermed-slate/40 border border-cybermed-teal/50 rounded-2xl p-8 backdrop-blur-md"
+        className="w-full max-w-lg glass-panel bg-cybermed-slate/40 border border-cybermed-teal/50 rounded-2xl p-6 md:p-8 backdrop-blur-md max-h-[90vh] overflow-y-auto"
       >
-        <div className="flex flex-col items-center text-center mb-8 border-b border-cybermed-slate pb-6">
+        <div className="flex flex-col items-center text-center mb-6 border-b border-white/10 pb-4">
           {getRoleIcon()}
-          <h2 className="text-sm tracking-widest text-cybermed-teal uppercase mb-1">Your Role Assignment</h2>
-          <h1 className="text-3xl font-bold text-white">{myPlayer?.role}</h1>
+          <h2 className="text-[10px] tracking-widest text-cybermed-teal uppercase mb-1">Your Role Assignment</h2>
+          <h1 className="text-2xl font-black text-white uppercase">{myPlayer?.role}</h1>
         </div>
 
-        <div className="mb-8">
+        {clinicalCase && (
+          <div className="mb-8 bg-black/60 border border-cybermed-slate rounded-xl p-5 shadow-inner">
+            <h3 className="text-cybermed-cyan text-xs font-black mb-3 uppercase tracking-widest flex items-center gap-2">
+              <FileText className="w-4 h-4"/> Clinical Case File
+            </h3>
+            <div className="space-y-4">
+              <div>
+                <span className="text-cybermed-teal/50 text-[10px] uppercase tracking-widest block mb-1">Diagnosed Pathology</span>
+                <p className="text-white font-mono bg-black/80 px-3 py-2 rounded text-sm border border-white/5">{clinicalCase.pathology}</p>
+              </div>
+              <div>
+                <span className="text-cybermed-teal/50 text-[10px] uppercase tracking-widest block mb-1">Observed Symptoms</span>
+                <p className="text-white/80 leading-relaxed text-sm bg-black/40 px-3 py-2 rounded">{clinicalCase.symptoms}</p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        <div className="mb-8 bg-cybermed-slate/20 p-5 rounded-xl border border-white/5">
           {renderRoleTask()}
         </div>
 
@@ -121,31 +139,30 @@ export const RoleAssignment = () => {
           <button 
             disabled={completed}
             onClick={handleComplete}
-            className={`w-full py-4 rounded-xl font-bold flex flex-col items-center justify-center transition-all ${
+            className={`w-full py-4 rounded-xl text-xs font-black tracking-widest flex flex-col items-center justify-center transition-all ${
               completed 
                ? 'bg-cybermed-teal/20 text-cybermed-teal border border-cybermed-teal cursor-not-allowed' 
-               : 'bg-cybermed-cyan text-black hover:bg-white'
+               : 'bg-gradient-to-r from-cybermed-teal to-cybermed-cyan text-black hover:scale-[1.02] shadow-[0_0_20px_rgba(6,182,212,0.5)]'
             }`}
           >
             {completed ? (
-               <><CheckCircle className="w-5 h-5 mb-1" /> DATA LOCKED & READY</>
+               <><CheckCircle className="w-5 h-5 mb-1" /> DATA LOCKED & SECURED</>
             ) : (
                'SUBMIT ANALYSIS TO BOARD'
             )}
           </button>
           
-          
           {completed && (
-            <p className="text-center text-xs text-cybermed-teal mt-4 animate-pulse">Waiting for remaining board members to finalize...</p>
+            <p className="text-center text-[10px] uppercase tracking-widest text-cybermed-teal mt-4 animate-pulse">Waiting for remaining board members to finalize...</p>
           )}
         </div>
 
         <div className="absolute top-4 right-4">
           <button 
             onClick={leaveRoom}
-            className="text-xs text-red-400 hover:text-red-300 transition-colors bg-red-900/20 px-3 py-1 rounded-md"
+            className="text-[10px] uppercase tracking-widest text-red-500 hover:text-white transition-colors bg-red-950/40 border border-red-500/30 hover:bg-red-600 px-3 py-1.5 rounded-md"
           >
-            Leave Game
+            Abort
           </button>
         </div>
       </motion.div>
