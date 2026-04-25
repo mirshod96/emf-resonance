@@ -49,8 +49,19 @@ const CLINICAL_CASES = [
 // Store rooms state in memory
 const rooms = {};
 
+const broadcastAdminSync = () => {
+  io.to('admin').emit('admin_sync', rooms);
+};
+
 io.on('connection', (socket) => {
-  console.log(`[Socket] Student connected: ${socket.id}`);
+  console.log(`[Socket] Client connected: ${socket.id}`);
+
+  // Admin Room Setup
+  socket.on('join_admin', () => {
+    socket.join('admin');
+    console.log(`[Socket] Admin connected: ${socket.id}`);
+    socket.emit('admin_sync', rooms);
+  });
 
   // 1. Join Room
   socket.on('join_room', ({ name, code }) => {
@@ -75,41 +86,36 @@ io.on('connection', (socket) => {
 
     const room = rooms[roomCode];
 
-    // Check if room is full
-    if (room.players.length >= 3) {
-      // If user is just reconnecting, maybe handle it, but for now reject
-      const existingPlayer = room.players.find(p => p.name === name);
-      if (!existingPlayer) {
-        socket.emit('room_full_error', { message: 'Room is already full! (Max 3 players)' });
-        return;
-      }
+    // Reject if room is full
+    if (room.players.length >= 3 && room.phase !== 'lobby-waiting') {
+      socket.emit('room_full_error', { message: 'This clinical board is already full/in-progress.' });
+      return;
     }
 
-    // Assign a random role and remove it from available roles
-    let assignedRole;
-    const existingPlayer = room.players.find(p => p.name === name);
-    
-    if (existingPlayer) {
-      assignedRole = existingPlayer.role;
-      existingPlayer.socketId = socket.id; // Update socket id on reconnect
-    } else {
-      const roleIndex = Math.floor(Math.random() * room.availableRoles.length);
-      assignedRole = room.availableRoles.splice(roleIndex, 1)[0];
-      
-      const newPlayer = {
-        id: socket.id,
-        name,
-        role: assignedRole,
-        taskCompleted: false
-      };
-      room.players.push(newPlayer);
+    // Assign Role
+    let assignedRole = "Observer";
+    if (room.availableRoles.length > 0) {
+      // Pick random role from available
+      const randomRoleIdx = Math.floor(Math.random() * room.availableRoles.length);
+      assignedRole = room.availableRoles.splice(randomRoleIdx, 1)[0];
     }
+
+    const playerObj = {
+      id: socket.id, // using socket id as temp unique ID
+      socketId: socket.id,
+      name,
+      role: assignedRole,
+      taskCompleted: false,
+      connected: true
+    };
+
+    room.players.push(playerObj);
 
     socket.join(roomCode);
-    console.log(`[Socket] ${name} (${assignedRole}) joined ${roomCode}`);
-
-    socket.roomId = roomCode; // Store room code on the socket instance
+    socket.roomId = roomCode;
     socket.playerId = socket.id;
+
+    console.log(`[Socket] ${name} joined ${roomCode} as ${assignedRole}`);
 
     // Acknowledge the join to the specific user
     socket.emit('join_success', { 
@@ -132,6 +138,8 @@ io.on('connection', (socket) => {
       patientState: room.patientState,
       scoreData: room.scoreData
     });
+    
+    broadcastAdminSync();
   });
 
   // 2. Submit Solo Task
@@ -160,6 +168,8 @@ io.on('connection', (socket) => {
       patientState: room.patientState,
       scoreData: room.scoreData
     });
+    
+    broadcastAdminSync();
   });
 
   // 3. Update Patient State (Phase 2 changes)
@@ -178,6 +188,8 @@ io.on('connection', (socket) => {
       patientState: room.patientState,
       scoreData: room.scoreData
     });
+
+    broadcastAdminSync();
   });
 
   // Calculate Score logic
@@ -235,15 +247,13 @@ io.on('connection', (socket) => {
       patientState: room.patientState,
       scoreData: room.scoreData
     });
+    
+    broadcastAdminSync();
   });
 
   // 4. Disconnect
   socket.on('disconnect', () => {
-    console.log(`[Socket] Student disconnected: ${socket.id}`);
-    
-    // 4. Disconnect
-  socket.on('disconnect', () => {
-    console.log(`[Socket] Student disconnected: ${socket.id}`);
+    console.log(`[Socket] Client disconnected: ${socket.id}`);
     
     // We don't remove them entirely to allow reconnecting via sessionStorage
     if (socket.roomId && rooms[socket.roomId]) {
@@ -251,12 +261,15 @@ io.on('connection', (socket) => {
       const player = room.players.find(p => p.socketId === socket.id || p.id === socket.id);
       if (player) {
          player.connected = false;
-         // Broadcast that they are offline (optional visual)
+         // Broadcast that they are offline
          io.to(socket.roomId).emit('sync_room', {
             players: room.players,
             phase: room.phase,
-            patientState: room.patientState
+            clinicalCase: room.clinicalCase,
+            patientState: room.patientState,
+            scoreData: room.scoreData
          });
+         broadcastAdminSync();
       }
     }
   });
@@ -281,14 +294,21 @@ io.on('connection', (socket) => {
       socket.emit('join_success', { 
         roomCode, 
         role: existingPlayer.role,
-        id: existingPlayer.id 
+        id: existingPlayer.id,
+        name
       });
 
       io.to(roomCode).emit('sync_room', {
         players: room.players,
         phase: room.phase,
-        patientState: room.patientState
+        clinicalCase: room.clinicalCase,
+        patientState: room.patientState,
+        scoreData: room.scoreData
       });
+      broadcastAdminSync();
+    }
+  });
+
   // 6. Leave Room / Start Over (Disband the entire room)
   socket.on('leave_room', () => {
     if (socket.roomId && rooms[socket.roomId]) {
@@ -306,6 +326,8 @@ io.on('connection', (socket) => {
       socket.leave(roomCode);
       socket.roomId = null;
       socket.playerId = null;
+      
+      broadcastAdminSync();
     }
   });
 
