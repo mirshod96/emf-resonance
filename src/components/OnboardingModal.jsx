@@ -9,7 +9,16 @@ export const OnboardingModal = ({ onComplete }) => {
     {
       title: "THE CLINICAL SIMULATION",
       subtitle: "Assemble your medical board",
-      icon: <Users className="w-20 h-20 text-cybermed-cyan" />,
+      visual: () => (
+        <div className="flex gap-2 w-full justify-center opacity-80 scale-90">
+          {['Biophysicist', 'Strategist', 'Safety Expert'].map((role, i) => (
+            <div key={i} className="bg-black/50 border border-cybermed-cyan/50 p-3 rounded-lg flex flex-col items-center">
+              <Users className={`w-6 h-6 mb-2 ${i===0?'text-blue-400':i===1?'text-purple-400':'text-green-400'}`}/>
+              <span className="text-[8px] uppercase tracking-widest">{role}</span>
+            </div>
+          ))}
+        </div>
+      ),
       text: "Welcome to EMF Resonance. You and two other doctors will form a Clinical Board. Together, you must diagnose and treat complex patients using advanced electromagnetic therapies.",
       color: "border-cybermed-cyan",
       shadow: "shadow-[0_0_30px_rgba(6,182,212,0.4)]"
@@ -17,7 +26,18 @@ export const OnboardingModal = ({ onComplete }) => {
     {
       title: "PHASE 1: SOLO ANALYSIS",
       subtitle: "Review the patient confidentially",
-      icon: <Stethoscope className="w-20 h-20 text-purple-400" />,
+      visual: () => (
+        <div className="w-full max-w-sm mx-auto bg-black/60 border border-purple-400/50 rounded-xl p-4 text-left scale-90">
+          <div className="flex items-center gap-2 border-b border-purple-500/30 pb-2 mb-3">
+             <Stethoscope className="w-4 h-4 text-purple-400"/>
+             <span className="text-[10px] uppercase text-purple-400 font-bold">Your Task</span>
+          </div>
+          <div className="bg-white/5 p-2 rounded text-[10px] text-white/70 mb-3 border border-white/10">
+            Classify and select the correct therapeutic modality based on pathology.
+          </div>
+          <button className="w-full bg-purple-500/20 border border-purple-500 text-purple-300 py-1.5 rounded text-[10px] font-bold">SUBMIT ANALYSIS</button>
+        </div>
+      ),
       text: "Each doctor will be assigned a unique role: Biophysicist, Clinical Strategist, or Safety Expert. You will independently review the case and lock in your individual analysis.",
       color: "border-purple-400",
       shadow: "shadow-[0_0_30px_rgba(192,132,252,0.4)]"
@@ -25,7 +45,22 @@ export const OnboardingModal = ({ onComplete }) => {
     {
       title: "PHASE 2: THE CONSOLE",
       subtitle: "Synchronize your treatment plan",
-      icon: <Zap className="w-20 h-20 text-yellow-400" />,
+      visual: () => (
+        <div className="grid grid-cols-3 gap-2 w-full opacity-90 scale-90">
+          <div className="bg-black/50 border border-cybermed-slate p-2 rounded-lg">
+             <div className="text-[8px] text-cybermed-cyan mb-2">FREQUENCY</div>
+             <div className="h-1 bg-cybermed-cyan/30 rounded w-full relative"><div className="absolute left-0 top-0 h-full w-1/2 bg-cybermed-cyan rounded"></div></div>
+          </div>
+          <div className="bg-black/50 border border-cybermed-slate p-2 rounded-lg">
+             <div className="text-[8px] text-cybermed-cyan mb-2">MODALITY</div>
+             <div className="text-[9px] border border-cybermed-slate rounded bg-white/5 px-1 py-0.5">UHF THERAPY</div>
+          </div>
+          <div className="bg-black/50 border border-cybermed-slate p-2 rounded-lg flex flex-col items-center">
+             <div className="text-[8px] text-cybermed-cyan mb-1">SAFETY</div>
+             <div className="bg-green-500/20 text-green-500 border border-green-500 rounded px-2 py-0.5 text-[8px] flex items-center gap-1">UNLOCK</div>
+          </div>
+        </div>
+      ),
       text: "Once all 3 doctors submit their solo analysis, the central console will unlock. You must collaborate to set the correct Penetration Frequency, select the Therapy Modality, and finally Authorize (Unlock) the machine.",
       color: "border-yellow-400",
       shadow: "shadow-[0_0_30px_rgba(250,204,21,0.4)]"
@@ -33,7 +68,18 @@ export const OnboardingModal = ({ onComplete }) => {
     {
       title: "TOURNAMENT RULES",
       subtitle: "Survive the clinical board",
-      icon: <ShieldAlert className="w-20 h-20 text-red-500" />,
+      visual: () => (
+        <div className="w-full max-w-[200px] mx-auto bg-red-900/20 border border-red-500/50 rounded-xl p-4 text-center scale-90 relative overflow-hidden">
+          <ShieldAlert className="w-12 h-12 text-red-500 mx-auto mb-2 animate-pulse"/>
+          <div className="text-xl font-black text-red-500 mb-1">FATAL ERROR</div>
+          <div className="flex justify-center gap-1 mt-2">
+             <div className="w-2 h-2 rounded-full border border-red-500 bg-red-900"></div>
+             <div className="w-2 h-2 rounded-full border border-red-500 bg-red-900"></div>
+             <div className="w-2 h-2 rounded-full border border-red-500 bg-red-900"></div>
+          </div>
+          <div className="text-[8px] text-red-400 mt-1">0 ATTEMPTS REMAINING</div>
+        </div>
+      ),
       text: "Your team has exactly 3 attempts to get a 100% cure rate. WARNING: Fatal errors, such as treating a patient with a cardiac pacemaker, will instantly terminate your team and send you to the Spectator Tribune!",
       color: "border-red-500",
       shadow: "shadow-[0_0_30px_rgba(239,68,68,0.4)]"
@@ -87,9 +133,9 @@ export const OnboardingModal = ({ onComplete }) => {
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
               transition={{ type: "spring", stiffness: 200, delay: 0.1 }}
-              className="mb-8 p-6 bg-white/5 rounded-full backdrop-blur-sm border border-white/10"
+              className="mb-8 w-full flex justify-center"
             >
-              {currentStep.icon}
+              {currentStep.visual()}
             </motion.div>
             
             <h2 className={`text-[10px] uppercase tracking-widest mb-2 font-bold ${currentStep.color.replace('border-', 'text-')}`}>
