@@ -18,33 +18,7 @@ const io = new Server(httpServer, {
 });
 
 const ROLES = ['Biophysicist', 'Clinical Strategist', 'Safety Expert'];
-
-const CLINICAL_CASES = [
-  {
-    id: 1,
-    title: "Deep Tissue Spasm",
-    text: "45yo patient. Chronic deep muscle spasms in the lumbar region. No metal implants. Requires deep heat penetration.",
-    targetModality: "Magnetotherapy",
-    targetFrequencyMax: 40, // Low freq = deep
-    requiresLock: false
-  },
-  {
-    id: 2,
-    title: "Superficial Joint Inflammation",
-    text: "28yo tennis player. Acute epicondylitis (tennis elbow). Superficial inflammation requiring surface heating.",
-    targetModality: "Microwave Therapy",
-    targetFrequencyMin: 70, // High freq = shallow
-    requiresLock: false
-  },
-  {
-    id: 3,
-    title: "The Pacemaker Trap",
-    text: "65yo patient. Severe knee osteoarthritis. Patient has a cardiac pacemaker fitted 2 years ago.",
-    targetModality: "Any",
-    targetFrequencyMin: 0,
-    requiresLock: true // MUST stay locked! Absolute contraindication.
-  }
-];
+const CLINICAL_CASES = require('./clinicalCases');
 
 // Store rooms state in memory
 const rooms = {};
