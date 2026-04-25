@@ -5,7 +5,7 @@ import { ShieldAlert, Zap, Stethoscope, Lock, Unlock } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 export const GroupConsole = () => {
-  const { patientState, updatePatientState, myPlayer, players } = useSocket();
+  const { patientState, updatePatientState, myPlayer, players, leaveRoom } = useSocket();
 
   const handleFrequencyChange = (e) => {
     if (myPlayer?.role === 'Biophysicist') {
@@ -47,10 +47,16 @@ export const GroupConsole = () => {
           </div>
           <div className="flex space-x-4">
             {players.map(p => (
-               <div key={p.id} className={`px-3 py-1 rounded text-xs font-bold ${p.id === 'me' ? 'bg-cybermed-teal text-black' : 'bg-black/50 text-cybermed-teal border border-cybermed-slate'}`}>
+               <div key={p.id} className={`px-3 py-1 rounded text-xs font-bold ${p.id === myPlayer?.id ? 'bg-cybermed-teal text-black' : 'bg-black/50 text-cybermed-teal border border-cybermed-slate'}`}>
                  {p.role}
                </div>
             ))}
+            <button 
+              onClick={leaveRoom}
+              className="px-3 py-1 bg-red-900/40 text-red-400 border border-red-500/50 rounded hover:bg-red-500 hover:text-white transition-colors text-xs ml-4"
+            >
+              LEAVE
+            </button>
           </div>
         </div>
 

@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 import { ShieldAlert, Zap, Stethoscope, CheckCircle } from 'lucide-react';
 
 export const RoleAssignment = () => {
-  const { myPlayer, completeSoloTask } = useSocket();
+  const { myPlayer, completeSoloTask, leaveRoom } = useSocket();
   const [completed, setCompleted] = useState(false);
 
   const [selectedModality, setSelectedModality] = useState(null);
@@ -134,9 +134,19 @@ export const RoleAssignment = () => {
             )}
           </button>
           
+          
           {completed && (
             <p className="text-center text-xs text-cybermed-teal mt-4 animate-pulse">Waiting for remaining board members to finalize...</p>
           )}
+        </div>
+
+        <div className="absolute top-4 right-4">
+          <button 
+            onClick={leaveRoom}
+            className="text-xs text-red-400 hover:text-red-300 transition-colors bg-red-900/20 px-3 py-1 rounded-md"
+          >
+            Leave Game
+          </button>
         </div>
       </motion.div>
     </div>

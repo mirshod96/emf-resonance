@@ -85,7 +85,8 @@ io.on('connection', (socket) => {
     socket.emit('join_success', { 
       roomCode, 
       role: assignedRole,
-      id: socket.id 
+      id: socket.id,
+      name // pass it back to frontend
     });
 
     // Check phase logic: If 3 players are in the room, phase => solo
@@ -147,12 +148,85 @@ io.on('connection', (socket) => {
   socket.on('disconnect', () => {
     console.log(`[Socket] Student disconnected: ${socket.id}`);
     
+    // 4. Disconnect
+  socket.on('disconnect', () => {
+    console.log(`[Socket] Student disconnected: ${socket.id}`);
+    
+    // We don't remove them entirely to allow reconnecting via sessionStorage
     if (socket.roomId && rooms[socket.roomId]) {
       const room = rooms[socket.roomId];
-      // We don't remove them entirely to allow reconnecting, 
-      // but you could add a timeout/cleanup if needed.
+      const player = room.players.find(p => p.socketId === socket.id || p.id === socket.id);
+      if (player) {
+         player.connected = false;
+         // Broadcast that they are offline (optional visual)
+         io.to(socket.roomId).emit('sync_room', {
+            players: room.players,
+            phase: room.phase,
+            patientState: room.patientState
+         });
+      }
     }
   });
+
+  // 5. Rejoin Room
+  socket.on('rejoin_room', ({ name, code, id }) => {
+    const roomCode = code.toUpperCase();
+    if (!rooms[roomCode]) return;
+    
+    const room = rooms[roomCode];
+    const existingPlayer = room.players.find(p => p.id === id);
+    
+    if (existingPlayer) {
+      existingPlayer.socketId = socket.id;
+      existingPlayer.connected = true;
+      socket.join(roomCode);
+      socket.roomId = roomCode;
+      socket.playerId = id;
+      
+      console.log(`[Socket] ${name} reconnected to ${roomCode}`);
+      
+      socket.emit('join_success', { 
+        roomCode, 
+        role: existingPlayer.role,
+        id: existingPlayer.id 
+      });
+
+      io.to(roomCode).emit('sync_room', {
+        players: room.players,
+        phase: room.phase,
+        patientState: room.patientState
+      });
+  // 6. Leave Room / Start Over
+  socket.on('leave_room', () => {
+    if (socket.roomId && rooms[socket.roomId]) {
+      const room = rooms[socket.roomId];
+      const playerIndex = room.players.findIndex(p => p.socketId === socket.id || p.id === socket.id);
+      
+      if (playerIndex !== -1) {
+        const removedPlayer = room.players.splice(playerIndex, 1)[0];
+        if (removedPlayer && removedPlayer.role) {
+          room.availableRoles.push(removedPlayer.role);
+          console.log(`[Socket] ${removedPlayer.name} left. Freed role ${removedPlayer.role}`);
+        }
+
+        if (room.players.length === 0) {
+          delete rooms[socket.roomId];
+          console.log(`[Socket] Room ${socket.roomId} is empty and deleted.`);
+        } else {
+          io.to(socket.roomId).emit('sync_room', {
+            players: room.players,
+            phase: room.phase,
+            patientState: room.patientState
+          });
+        }
+      }
+      
+      socket.leave(socket.roomId);
+      socket.roomId = null;
+      socket.playerId = null;
+    }
+  });
+
 });
 
 const PORT = 3001;

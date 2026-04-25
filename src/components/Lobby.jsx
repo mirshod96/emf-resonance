@@ -48,8 +48,14 @@ export const Lobby = () => {
           </div>
 
           {players.length < 3 && (
-            <motion.div className="mt-8 flex justify-center text-cybermed-teal/70 text-sm italic">
-              <p>Waiting for {3 - players.length} more doctors to connect...</p>
+            <motion.div className="mt-8 flex flex-col items-center space-y-4">
+              <p className="text-cybermed-teal/70 text-sm italic">Waiting for {3 - players.length} more doctors to connect...</p>
+              <button 
+                onClick={leaveRoom}
+                className="text-xs text-red-400 hover:text-red-300 transition-colors border border-red-500/30 px-4 py-2 rounded-lg"
+              >
+                Start Over / Leave Team
+              </button>
             </motion.div>
           )}
 

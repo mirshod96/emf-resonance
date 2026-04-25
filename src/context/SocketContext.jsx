@@ -26,11 +26,21 @@ export const SocketProvider = ({ children }) => {
   useEffect(() => {
     socket.connect();
 
-    socket.on('join_success', ({ roomCode: rCode, role, id }) => {
+    // Auto-reconnect if session exists
+    const storedSession = sessionStorage.getItem('emf_session');
+    if (storedSession) {
+      const sessionData = JSON.parse(storedSession);
+      socket.emit('rejoin_room', sessionData);
+    }
+
+    socket.on('join_success', ({ roomCode: rCode, role, id, name }) => {
       setRoomCode(rCode);
       setMyPlayer({ id, role, taskCompleted: false });
       setPhase('lobby-waiting');
       setErrorMessage('');
+      
+      // Save session so we can restore it on refresh
+      sessionStorage.setItem('emf_session', JSON.stringify({ name, code: rCode, id }));
     });
 
     socket.on('sync_room', (data) => {
@@ -72,6 +82,16 @@ export const SocketProvider = ({ children }) => {
     socket.emit('update_patient_state', updates);
   };
 
+  const leaveRoom = () => {
+    socket.emit('leave_room');
+    sessionStorage.removeItem('emf_session');
+    setRoomCode('');
+    setMyPlayer(null);
+    setPlayers([]);
+    setPhase('lobby');
+    setPatientState({ frequency: 50, modality: '', isAuthorized: false });
+  };
+
   return (
     <SocketContext.Provider value={{
       phase,
@@ -81,6 +101,7 @@ export const SocketProvider = ({ children }) => {
       patientState,
       errorMessage,
       joinRoom,
+      leaveRoom,
       completeSoloTask,
       updatePatientState
     }}>
