@@ -80,7 +80,8 @@ io.on('connection', (socket) => {
           isAuthorized: false,
         },
         phase: 'lobby-waiting',
-        scoreData: null
+        scoreData: null,
+        attemptsLeft: 3
       };
     }
 
@@ -136,7 +137,8 @@ io.on('connection', (socket) => {
       phase: room.phase,
       clinicalCase: room.clinicalCase,
       patientState: room.patientState,
-      scoreData: room.scoreData
+      scoreData: room.scoreData,
+      attemptsLeft: room.attemptsLeft
     });
     
     broadcastAdminSync();
@@ -166,7 +168,8 @@ io.on('connection', (socket) => {
       phase: room.phase,
       clinicalCase: room.clinicalCase,
       patientState: room.patientState,
-      scoreData: room.scoreData
+      scoreData: room.scoreData,
+      attemptsLeft: room.attemptsLeft
     });
     
     broadcastAdminSync();
@@ -186,7 +189,8 @@ io.on('connection', (socket) => {
       phase: room.phase,
       clinicalCase: room.clinicalCase,
       patientState: room.patientState,
-      scoreData: room.scoreData
+      scoreData: room.scoreData,
+      attemptsLeft: room.attemptsLeft
     });
 
     broadcastAdminSync();
@@ -207,7 +211,8 @@ io.on('connection', (socket) => {
     // Critical Failure: Shocked a pacemaker
     if (cCase.requiresLock && pState.isAuthorized) {
       score = 0;
-      feedback.push("CRITICAL ERROR: Treatment applied despite absolute contraindication (Pacemaker). Patient safety compromised!");
+      room.attemptsLeft = 0; // INSTANT DEATH
+      feedback.push("FATAL ERROR: Treatment applied despite absolute contraindication (Pacemaker). Patient safety compromised. MEDICAL BOARD LICENSE REVOKED.");
     } else if (cCase.requiresLock && !pState.isAuthorized) {
       score = 100;
       feedback.push("EXCELLENT: You correctly withheld treatment due to an absolute contraindication.");
@@ -227,13 +232,18 @@ io.on('connection', (socket) => {
          const freq = parseInt(pState.frequency);
          if (cCase.targetFrequencyMax !== undefined && freq > cCase.targetFrequencyMax) {
            score -= 40;
-           feedback.push(`INCORRECT FREQUENCY: ${freq} is too superficial. Needed deeper penetration (<${cCase.targetFrequencyMax}).`);
+           feedback.push(`INCORRECT FREQUENCY: ${freq} MHz is too superficial. Needed deeper penetration (<${cCase.targetFrequencyMax}).`);
          } else if (cCase.targetFrequencyMin !== undefined && freq < cCase.targetFrequencyMin) {
            score -= 40;
-           feedback.push(`INCORRECT FREQUENCY: ${freq} is too deep. Needed superficial heating (>${cCase.targetFrequencyMin}).`);
+           feedback.push(`INCORRECT FREQUENCY: ${freq} MHz is too deep. Needed superficial heating (>${cCase.targetFrequencyMin}).`);
          } else {
            feedback.push(`CORRECT FREQUENCY: Depth penetration was optimal.`);
          }
+      }
+      
+      // Deduct attempt if not perfect and not instant death
+      if (score < 100) {
+        room.attemptsLeft = Math.max(0, room.attemptsLeft - 1);
       }
     }
 
@@ -245,8 +255,57 @@ io.on('connection', (socket) => {
       phase: room.phase,
       clinicalCase: room.clinicalCase,
       patientState: room.patientState,
-      scoreData: room.scoreData
+      scoreData: room.scoreData,
+      attemptsLeft: room.attemptsLeft
     });
+    
+    broadcastAdminSync();
+  });
+
+  // Retry logic (3 chances)
+  socket.on('retry_treatment', () => {
+    if (!socket.roomId) return;
+    const room = rooms[socket.roomId];
+    if (!room) return;
+
+    if (room.attemptsLeft > 0) {
+      room.phase = 'group';
+      // Lock the system again to force them to authorize
+      room.patientState.isAuthorized = false;
+      
+      io.to(socket.roomId).emit('sync_room', {
+        players: room.players,
+        phase: room.phase,
+        clinicalCase: room.clinicalCase,
+        patientState: room.patientState,
+        scoreData: room.scoreData,
+        attemptsLeft: room.attemptsLeft
+      });
+      broadcastAdminSync();
+    }
+  });
+
+  // Enter spectator mode logic
+  socket.on('enter_spectator', () => {
+    if (!socket.roomId) return;
+    const room = rooms[socket.roomId];
+    if (!room) return;
+
+    room.phase = 'spectator';
+    
+    io.to(socket.roomId).emit('sync_room', {
+      players: room.players,
+      phase: room.phase,
+      clinicalCase: room.clinicalCase,
+      patientState: room.patientState,
+      scoreData: room.scoreData,
+      attemptsLeft: room.attemptsLeft
+    });
+    
+    // Also give them admin access secretly
+    // They are in the room, but we can also broadcast admin state so Spectator works!
+    socket.emit('admin_sync', rooms);
+    socket.join('admin');
     
     broadcastAdminSync();
   });
@@ -267,7 +326,8 @@ io.on('connection', (socket) => {
             phase: room.phase,
             clinicalCase: room.clinicalCase,
             patientState: room.patientState,
-            scoreData: room.scoreData
+            scoreData: room.scoreData,
+            attemptsLeft: room.attemptsLeft
          });
          broadcastAdminSync();
       }
@@ -303,8 +363,14 @@ io.on('connection', (socket) => {
         phase: room.phase,
         clinicalCase: room.clinicalCase,
         patientState: room.patientState,
-        scoreData: room.scoreData
+        scoreData: room.scoreData,
+        attemptsLeft: room.attemptsLeft
       });
+      // If they are rejoining a spectator room, make sure they get admin updates
+      if (room.phase === 'spectator') {
+         socket.join('admin');
+         socket.emit('admin_sync', rooms);
+      }
       broadcastAdminSync();
     }
   });

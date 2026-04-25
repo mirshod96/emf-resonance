@@ -23,6 +23,7 @@ export const SocketProvider = ({ children }) => {
     isAuthorized: false,
   });
   
+  const [attemptsLeft, setAttemptsLeft] = useState(3);
   const [clinicalCase, setClinicalCase] = useState(null);
   const [scoreData, setScoreData] = useState(null);
 
@@ -52,6 +53,7 @@ export const SocketProvider = ({ children }) => {
       setPatientState(data.patientState);
       if (data.clinicalCase) setClinicalCase(data.clinicalCase);
       if (data.scoreData !== undefined) setScoreData(data.scoreData);
+      if (data.attemptsLeft !== undefined) setAttemptsLeft(data.attemptsLeft);
       
       // Update myPlayer's taskCompleted status locally if synced from server
       setMyPlayer(prev => {
@@ -72,6 +74,7 @@ export const SocketProvider = ({ children }) => {
       setPlayers([]);
       setPhase('lobby');
       setPatientState({ frequency: 50, modality: '', isAuthorized: false });
+      setAttemptsLeft(3);
       setErrorMessage('Команда была распущена, так как один из участников покинул игру.');
     });
 
@@ -106,10 +109,19 @@ export const SocketProvider = ({ children }) => {
     setPlayers([]);
     setPhase('lobby');
     setPatientState({ frequency: 50, modality: '', isAuthorized: false });
+    setAttemptsLeft(3);
   };
 
   const evaluateTreatment = () => {
     socket.emit('evaluate_treatment');
+  };
+
+  const retryTreatment = () => {
+    socket.emit('retry_treatment');
+  };
+
+  const enterSpectator = () => {
+    socket.emit('enter_spectator');
   };
 
   return (
@@ -121,12 +133,15 @@ export const SocketProvider = ({ children }) => {
       patientState,
       clinicalCase,
       scoreData,
+      attemptsLeft,
       errorMessage,
       joinRoom,
       leaveRoom,
       completeSoloTask,
       updatePatientState,
-      evaluateTreatment
+      evaluateTreatment,
+      retryTreatment,
+      enterSpectator
     }}>
       {children}
     </SocketContext.Provider>

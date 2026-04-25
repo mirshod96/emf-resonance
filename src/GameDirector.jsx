@@ -4,6 +4,7 @@ import { Lobby } from './components/Lobby';
 import { RoleAssignment } from './components/RoleAssignment';
 import { GroupConsole } from './components/GroupConsole';
 import { ResultsScreen } from './components/ResultsScreen';
+import { SpectatorScreen } from './components/SpectatorScreen';
 import { AnimatePresence, motion } from 'framer-motion';
 
 const GameDirector = () => {
@@ -29,6 +30,11 @@ const GameDirector = () => {
       {phase === 'results' && (
         <motion.div key="results" initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }}>
           <ResultsScreen />
+        </motion.div>
+      )}
+      {phase === 'spectator' && (
+        <motion.div key="spectator" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+          <SpectatorScreen />
         </motion.div>
       )}
     </AnimatePresence>
