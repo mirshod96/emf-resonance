@@ -19,6 +19,33 @@ const io = new Server(httpServer, {
 
 const ROLES = ['Biophysicist', 'Clinical Strategist', 'Safety Expert'];
 
+const CLINICAL_CASES = [
+  {
+    id: 1,
+    title: "Deep Tissue Spasm",
+    text: "45yo patient. Chronic deep muscle spasms in the lumbar region. No metal implants. Requires deep heat penetration.",
+    targetModality: "Magnetotherapy",
+    targetFrequencyMax: 40, // Low freq = deep
+    requiresLock: false
+  },
+  {
+    id: 2,
+    title: "Superficial Joint Inflammation",
+    text: "28yo tennis player. Acute epicondylitis (tennis elbow). Superficial inflammation requiring surface heating.",
+    targetModality: "Microwave Therapy",
+    targetFrequencyMin: 70, // High freq = shallow
+    requiresLock: false
+  },
+  {
+    id: 3,
+    title: "The Pacemaker Trap",
+    text: "65yo patient. Severe knee osteoarthritis. Patient has a cardiac pacemaker fitted 2 years ago.",
+    targetModality: "Any",
+    targetFrequencyMin: 0,
+    requiresLock: true // MUST stay locked! Absolute contraindication.
+  }
+];
+
 // Store rooms state in memory
 const rooms = {};
 
@@ -31,15 +58,18 @@ io.on('connection', (socket) => {
     
     // Initialize room if it doesn't exist
     if (!rooms[roomCode]) {
+      const randomCase = CLINICAL_CASES[Math.floor(Math.random() * CLINICAL_CASES.length)];
       rooms[roomCode] = {
         players: [],
         availableRoles: [...ROLES],
+        clinicalCase: randomCase,
         patientState: {
           frequency: 50,
           modality: '',
           isAuthorized: false,
         },
-        phase: 'lobby-waiting'
+        phase: 'lobby-waiting',
+        scoreData: null
       };
     }
 
@@ -98,7 +128,9 @@ io.on('connection', (socket) => {
     io.to(roomCode).emit('sync_room', {
       players: room.players,
       phase: room.phase,
-      patientState: room.patientState
+      clinicalCase: room.clinicalCase,
+      patientState: room.patientState,
+      scoreData: room.scoreData
     });
   });
 
@@ -124,7 +156,9 @@ io.on('connection', (socket) => {
     io.to(socket.roomId).emit('sync_room', {
       players: room.players,
       phase: room.phase,
-      patientState: room.patientState
+      clinicalCase: room.clinicalCase,
+      patientState: room.patientState,
+      scoreData: room.scoreData
     });
   });
 
@@ -140,7 +174,66 @@ io.on('connection', (socket) => {
     io.to(socket.roomId).emit('sync_room', {
       players: room.players,
       phase: room.phase,
-      patientState: room.patientState
+      clinicalCase: room.clinicalCase,
+      patientState: room.patientState,
+      scoreData: room.scoreData
+    });
+  });
+
+  // Calculate Score logic
+  socket.on('evaluate_treatment', () => {
+    if (!socket.roomId) return;
+    const room = rooms[socket.roomId];
+    if (!room) return;
+
+    const pState = room.patientState;
+    const cCase = room.clinicalCase;
+
+    let score = 100;
+    let feedback = [];
+
+    // Critical Failure: Shocked a pacemaker
+    if (cCase.requiresLock && pState.isAuthorized) {
+      score = 0;
+      feedback.push("CRITICAL ERROR: Treatment applied despite absolute contraindication (Pacemaker). Patient safety compromised!");
+    } else if (cCase.requiresLock && !pState.isAuthorized) {
+      score = 100;
+      feedback.push("EXCELLENT: You correctly withheld treatment due to an absolute contraindication.");
+    } else {
+      // Normal Treatment Evaluation
+      if (!pState.isAuthorized) {
+         score = 0;
+         feedback.push("FAILED: You never authorized the treatment. Patient received no care.");
+      } else {
+         if (cCase.targetModality !== "Any" && pState.modality !== cCase.targetModality) {
+           score -= 40;
+           feedback.push(`INCORRECT MODALITY: You chose ${pState.modality || 'Nothing'}, but the pathology required ${cCase.targetModality}.`);
+         } else {
+           feedback.push(`CORRECT MODALITY: ${pState.modality} was the right choice.`);
+         }
+
+         const freq = parseInt(pState.frequency);
+         if (cCase.targetFrequencyMax !== undefined && freq > cCase.targetFrequencyMax) {
+           score -= 40;
+           feedback.push(`INCORRECT FREQUENCY: ${freq} is too superficial. Needed deeper penetration (<${cCase.targetFrequencyMax}).`);
+         } else if (cCase.targetFrequencyMin !== undefined && freq < cCase.targetFrequencyMin) {
+           score -= 40;
+           feedback.push(`INCORRECT FREQUENCY: ${freq} is too deep. Needed superficial heating (>${cCase.targetFrequencyMin}).`);
+         } else {
+           feedback.push(`CORRECT FREQUENCY: Depth penetration was optimal.`);
+         }
+      }
+    }
+
+    room.scoreData = { score: Math.max(0, score), feedback };
+    room.phase = 'results';
+
+    io.to(socket.roomId).emit('sync_room', {
+      players: room.players,
+      phase: room.phase,
+      clinicalCase: room.clinicalCase,
+      patientState: room.patientState,
+      scoreData: room.scoreData
     });
   });
 

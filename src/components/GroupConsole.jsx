@@ -5,7 +5,7 @@ import { ShieldAlert, Zap, Stethoscope, Lock, Unlock } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 export const GroupConsole = () => {
-  const { patientState, updatePatientState, myPlayer, players, leaveRoom } = useSocket();
+  const { patientState, updatePatientState, myPlayer, players, leaveRoom, clinicalCase, evaluateTreatment } = useSocket();
 
   const handleFrequencyChange = (e) => {
     if (myPlayer?.role === 'Biophysicist') {
@@ -27,7 +27,7 @@ export const GroupConsole = () => {
 
   const handleStart = () => {
     if (patientState.isAuthorized) {
-       alert("Treatment Initialized! Evaluating Resonance Score...");
+       evaluateTreatment();
     }
   };
 
@@ -37,26 +37,35 @@ export const GroupConsole = () => {
         initial={{ scale: 1.1, filter: "brightness(2) contrast(2)" }}
         animate={{ scale: 1, filter: "brightness(1) contrast(1)" }}
         transition={{ duration: 0.8 }}
-        className="w-full max-w-5xl grid grid-cols-1 md:grid-cols-3 gap-6"
+        className="w-full max-w-7xl grid grid-cols-1 xl:grid-cols-4 gap-6"
       >
-        {/* Header */}
-        <div className="col-span-1 md:col-span-3 mb-4 bg-cybermed-slate/40 border border-cybermed-teal/30 rounded-2xl p-6 flex justify-between items-center backdrop-blur-md">
-          <div>
-            <h1 className="text-2xl font-bold text-cybermed-cyan tracking-wider">COLLABORATIVE CLINICAL BOARD</h1>
-            <p className="text-sm text-cybermed-teal">Patient ID: 894-B // EMF Treatment Console</p>
+        {/* Header containing Patient Target Info */}
+        <div className="col-span-1 xl:col-span-4 mb-4 bg-cybermed-slate/40 border border-t-[4px] border-t-cybermed-cyan border-cybermed-teal/30 rounded-2xl p-6 grid grid-cols-1 md:grid-cols-3 gap-6 backdrop-blur-md">
+          <div className="md:col-span-2">
+            <h1 className="text-xl font-bold text-cybermed-cyan tracking-wider mb-2 uppercase flex items-center gap-2">
+              <Stethoscope className="w-5 h-5"/> 
+              TARGET CLINICAL CASE: {clinicalCase?.title}
+            </h1>
+            <p className="text-sm text-cybermed-teal leading-relaxed p-3 bg-black/40 rounded-lg border border-cybermed-slate">
+               {clinicalCase?.text}
+            </p>
           </div>
-          <div className="flex space-x-4">
-            {players.map(p => (
-               <div key={p.id} className={`px-3 py-1 rounded text-xs font-bold ${p.id === myPlayer?.id ? 'bg-cybermed-teal text-black' : 'bg-black/50 text-cybermed-teal border border-cybermed-slate'}`}>
-                 {p.role}
-               </div>
-            ))}
-            <button 
-              onClick={leaveRoom}
-              className="px-3 py-1 bg-red-900/40 text-red-400 border border-red-500/50 rounded hover:bg-red-500 hover:text-white transition-colors text-xs ml-4"
-            >
-              LEAVE
-            </button>
+          
+          <div className="flex flex-col justify-center items-end">
+            <div className="text-[10px] text-cybermed-teal uppercase mb-2 tracking-widest text-right">Medical Board {players.length}/3 Online</div>
+            <div className="flex space-x-2">
+              {players.map(p => (
+                 <div key={p.id} className={`px-2 py-1 rounded text-[10px] uppercase font-bold ${p.id === myPlayer?.id ? 'bg-cybermed-cyan text-black' : 'bg-black/50 text-cybermed-teal border border-cybermed-slate'}`}>
+                   {p.role.substring(0,6)}
+                 </div>
+              ))}
+              <button 
+                onClick={leaveRoom}
+                className="px-2 py-1 bg-red-900/40 text-red-500 border border-red-500/50 rounded hover:bg-red-500 hover:text-white transition-colors text-[10px] ml-2"
+              >
+                LEAVE
+              </button>
+            </div>
           </div>
         </div>
 

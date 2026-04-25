@@ -3,6 +3,7 @@ import { useSocket } from './context/SocketContext';
 import { Lobby } from './components/Lobby';
 import { RoleAssignment } from './components/RoleAssignment';
 import { GroupConsole } from './components/GroupConsole';
+import { ResultsScreen } from './components/ResultsScreen';
 import { AnimatePresence, motion } from 'framer-motion';
 
 const GameDirector = () => {
@@ -23,6 +24,11 @@ const GameDirector = () => {
       {phase === 'group' && (
         <motion.div key="group" initial={{ opacity: 0, filter: "brightness(5)" }} animate={{ opacity: 1, filter: "brightness(1)" }}>
           <GroupConsole />
+        </motion.div>
+      )}
+      {phase === 'results' && (
+        <motion.div key="results" initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }}>
+          <ResultsScreen />
         </motion.div>
       )}
     </AnimatePresence>

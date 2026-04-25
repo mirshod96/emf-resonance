@@ -22,6 +22,9 @@ export const SocketProvider = ({ children }) => {
     modality: '',
     isAuthorized: false,
   });
+  
+  const [clinicalCase, setClinicalCase] = useState(null);
+  const [scoreData, setScoreData] = useState(null);
 
   useEffect(() => {
     socket.connect();
@@ -47,6 +50,8 @@ export const SocketProvider = ({ children }) => {
       setPlayers(data.players);
       setPhase(data.phase);
       setPatientState(data.patientState);
+      if (data.clinicalCase) setClinicalCase(data.clinicalCase);
+      if (data.scoreData !== undefined) setScoreData(data.scoreData);
       
       // Update myPlayer's taskCompleted status locally if synced from server
       setMyPlayer(prev => {
@@ -103,6 +108,10 @@ export const SocketProvider = ({ children }) => {
     setPatientState({ frequency: 50, modality: '', isAuthorized: false });
   };
 
+  const evaluateTreatment = () => {
+    socket.emit('evaluate_treatment');
+  };
+
   return (
     <SocketContext.Provider value={{
       phase,
@@ -110,11 +119,14 @@ export const SocketProvider = ({ children }) => {
       myPlayer,
       players,
       patientState,
+      clinicalCase,
+      scoreData,
       errorMessage,
       joinRoom,
       leaveRoom,
       completeSoloTask,
-      updatePatientState
+      updatePatientState,
+      evaluateTreatment
     }}>
       {children}
     </SocketContext.Provider>
