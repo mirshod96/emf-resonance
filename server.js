@@ -198,20 +198,20 @@ io.on('connection', (socket) => {
       } else {
          if (cCase.targetModality !== "Any" && pState.modality !== cCase.targetModality) {
            score -= 40;
-           feedback.push(`INCORRECT MODALITY: You chose ${pState.modality || 'Nothing'}, but the pathology required ${cCase.targetModality}.`);
+           feedback.push(`INCORRECT MODALITY (Clinical Hint): The physical properties of ${pState.modality || 'Nothing'} do not match the pathology characteristics described in the case. Rethink the mechanism of action required for this specific tissue.`);
          } else {
-           feedback.push(`CORRECT MODALITY: ${pState.modality} was the right choice.`);
+           feedback.push(`CORRECT MODALITY: Your clinical reasoning for modality selection was accurate.`);
          }
 
          const freq = parseInt(pState.frequency);
          if (cCase.targetFrequencyMax !== undefined && freq > cCase.targetFrequencyMax) {
            score -= 40;
-           feedback.push(`INCORRECT FREQUENCY: ${freq} MHz is too superficial. Needed deeper penetration (<${cCase.targetFrequencyMax}).`);
+           feedback.push(`INCORRECT FREQUENCY (Clinical Hint): Your chosen frequency (${freq} Hz) caused predominantly superficial energy absorption. The clinical presentation indicates the pathology is located significantly deeper.`);
          } else if (cCase.targetFrequencyMin !== undefined && freq < cCase.targetFrequencyMin) {
            score -= 40;
-           feedback.push(`INCORRECT FREQUENCY: ${freq} MHz is too deep. Needed superficial heating (>${cCase.targetFrequencyMin}).`);
+           feedback.push(`INCORRECT FREQUENCY (Clinical Hint): Your chosen frequency (${freq} Hz) resulted in deep tissue penetration, entirely bypassing the superficial layers where the actual inflammation/pathology is located.`);
          } else {
-           feedback.push(`CORRECT FREQUENCY: Depth penetration was optimal.`);
+           feedback.push(`CORRECT FREQUENCY: Depth penetration matched the anatomical location of the target tissue.`);
          }
       }
       
