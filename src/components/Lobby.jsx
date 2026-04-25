@@ -1,12 +1,26 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useSocket } from '../context/SocketContext';
 import { motion } from 'framer-motion';
 import { Activity } from 'lucide-react';
+import { OnboardingModal } from './OnboardingModal';
 
 export const Lobby = () => {
   const { phase, joinRoom, leaveRoom, players, myPlayer, errorMessage } = useSocket();
   const [name, setName] = useState('');
   const [code, setCode] = useState('');
+  const [showOnboarding, setShowOnboarding] = useState(false);
+
+  useEffect(() => {
+    const hasSeen = localStorage.getItem('emf_onboarding_seen');
+    if (!hasSeen) {
+      setShowOnboarding(true);
+    }
+  }, []);
+
+  const handleOnboardingComplete = () => {
+    localStorage.setItem('emf_onboarding_seen', 'true');
+    setShowOnboarding(false);
+  };
 
   const handleJoin = (e) => {
     e.preventDefault();
@@ -124,6 +138,8 @@ export const Lobby = () => {
           </button>
         </form>
       </motion.div>
+
+      {showOnboarding && <OnboardingModal onComplete={handleOnboardingComplete} />}
     </div>
   );
 };
