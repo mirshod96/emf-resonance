@@ -6,7 +6,7 @@ import { GroupConsole } from './components/GroupConsole';
 import { AnimatePresence, motion } from 'framer-motion';
 
 const GameDirector = () => {
-  const { phase } = useMockSocket();
+  const { phase } = useSocket();
 
   return (
     <AnimatePresence mode="wait">

@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 import { ShieldAlert, Zap, Stethoscope, CheckCircle } from 'lucide-react';
 
 export const RoleAssignment = () => {
-  const { myPlayer, completeSoloTask } = useMockSocket();
+  const { myPlayer, completeSoloTask } = useSocket();
   const [completed, setCompleted] = useState(false);
 
   const handleComplete = () => {

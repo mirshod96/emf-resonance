@@ -5,7 +5,7 @@ import { ShieldAlert, Zap, Stethoscope, Lock, Unlock } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 export const GroupConsole = () => {
-  const { patientState, updatePatientState, myPlayer, players } = useMockSocket();
+  const { patientState, updatePatientState, myPlayer, players } = useSocket();
 
   const handleFrequencyChange = (e) => {
     if (myPlayer?.role === 'Biophysicist') {
