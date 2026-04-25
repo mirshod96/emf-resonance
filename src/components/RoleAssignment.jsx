@@ -114,18 +114,18 @@ export const RoleAssignment = () => {
         </div>
 
         {clinicalCase && (
-          <div className="mb-8 bg-black/60 border border-cybermed-slate rounded-xl p-5 shadow-inner">
+          <div className="mb-8 bg-black/60 border border-cybermed-slate rounded-xl p-5 shadow-inner text-left">
             <h3 className="text-cybermed-cyan text-xs font-black mb-3 uppercase tracking-widest flex items-center gap-2">
               <FileText className="w-4 h-4"/> Clinical Case File
             </h3>
             <div className="space-y-4">
               <div>
                 <span className="text-cybermed-teal/50 text-[10px] uppercase tracking-widest block mb-1">Diagnosed Pathology</span>
-                <p className="text-white font-mono bg-black/80 px-3 py-2 rounded text-sm border border-white/5">{clinicalCase.pathology}</p>
+                <p className="text-white font-mono bg-black/80 px-3 py-2 rounded text-sm border border-white/5">{clinicalCase.title}</p>
               </div>
               <div>
-                <span className="text-cybermed-teal/50 text-[10px] uppercase tracking-widest block mb-1">Observed Symptoms</span>
-                <p className="text-white/80 leading-relaxed text-sm bg-black/40 px-3 py-2 rounded">{clinicalCase.symptoms}</p>
+                <span className="text-cybermed-teal/50 text-[10px] uppercase tracking-widest block mb-1">Patient History & Symptoms</span>
+                <p className="text-white/80 leading-relaxed text-sm bg-black/40 px-3 py-2 rounded border border-white/5">{clinicalCase.text}</p>
               </div>
             </div>
           </div>
