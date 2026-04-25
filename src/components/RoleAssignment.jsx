@@ -7,6 +7,9 @@ export const RoleAssignment = () => {
   const { myPlayer, completeSoloTask } = useSocket();
   const [completed, setCompleted] = useState(false);
 
+  const [selectedModality, setSelectedModality] = useState(null);
+  const [screenedItems, setScreenedItems] = useState({});
+
   const handleComplete = () => {
     setCompleted(true);
     completeSoloTask();
@@ -33,7 +36,15 @@ export const RoleAssignment = () => {
             <p className="text-cybermed-teal">Task: Classify and select the correct therapeutic modality based on pathology.</p>
             <div className="grid grid-cols-1 gap-3">
               {['UHF Therapy', 'Microwave Therapy', 'Magnetotherapy'].map(mod => (
-                <button key={mod} className="bg-black/40 border border-cybermed-slate p-3 rounded-xl hover:border-cybermed-cyan transition-colors text-left pl-4 w-full focus:bg-cybermed-teal/20 focus:border-cybermed-cyan">
+                <button 
+                  key={mod} 
+                  onClick={() => setSelectedModality(mod)}
+                  className={`border p-3 rounded-xl transition-colors text-left pl-4 w-full ${
+                    selectedModality === mod 
+                      ? 'bg-cybermed-teal/30 border-cybermed-cyan text-white shadow-[0_0_10px_rgba(6,182,212,0.3)]' 
+                      : 'bg-black/40 border-cybermed-slate hover:border-cybermed-cyan'
+                  }`}
+                >
                   {mod}
                 </button>
               ))}
@@ -46,15 +57,29 @@ export const RoleAssignment = () => {
             <p className="text-cybermed-teal">Task: Screen patient history for absolute and relative contraindications.</p>
             <div className="space-y-3">
               {[
-                { label: 'Pacemaker present', safe: false },
-                { label: 'Acute Inflammation', safe: false },
-                { label: 'Mild muscle pain', safe: true }
+                { label: 'Pacemaker present' },
+                { label: 'Acute Inflammation' },
+                { label: 'Mild muscle pain' }
               ].map((item, idx) => (
                 <div key={idx} className="flex items-center justify-between bg-black/40 p-3 rounded-xl border border-cybermed-slate">
                   <span className="text-sm">{item.label}</span>
                   <div className="flex space-x-2">
-                    <button className="text-xs px-3 py-1 border border-red-500/50 text-red-500 rounded hover:bg-red-500 hover:text-white transition-colors">Risk</button>
-                    <button className="text-xs px-3 py-1 border border-green-500/50 text-green-500 rounded hover:bg-green-500 hover:text-white transition-colors">Clear</button>
+                    <button 
+                      onClick={() => setScreenedItems({...screenedItems, [idx]: 'risk'})}
+                      className={`text-xs px-3 py-1 border rounded transition-colors ${
+                        screenedItems[idx] === 'risk' ? 'bg-red-500 text-white border-red-500' : 'border-red-500/50 text-red-500 hover:bg-red-500 hover:text-white'
+                      }`}
+                    >
+                      Risk
+                    </button>
+                    <button 
+                      onClick={() => setScreenedItems({...screenedItems, [idx]: 'clear'})}
+                      className={`text-xs px-3 py-1 border rounded transition-colors ${
+                        screenedItems[idx] === 'clear' ? 'bg-green-500 text-white border-green-500' : 'border-green-500/50 text-green-500 hover:bg-green-500 hover:text-white'
+                      }`}
+                    >
+                      Clear
+                    </button>
                   </div>
                 </div>
               ))}
