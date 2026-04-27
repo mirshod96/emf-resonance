@@ -157,6 +157,84 @@ const CLINICAL_CASES = [
     text: "Patient has severe chest and back pain associated with active, cavitary pulmonary tuberculosis. Systemic stimulation is contraindicated.",
     targetModality: "Any",
     requiresLock: true
+  },
+
+  // --- ELECTROTHERAPY (Neuromuscular & Non-Thermal Pain Block) ---
+  {
+    id: "case-021",
+    title: "Sensory Nerve De-afferentation",
+    text: "Diabetic patient suffering from severe neuropathic pain in lower extremities. Heating modalities are contraindicated due to 100% loss of thermal sensation. Requires direct electrical pain gate blocking.",
+    targetModality: "Electrotherapy",
+    requiresLock: false
+  },
+  {
+    id: "case-022",
+    title: "Post-Ischemic Muscle Atrophy",
+    text: "Profound muscle wasting in the left triceps post-stroke. Patient needs motor unit recruitment without deep thermal loading.",
+    targetModality: "Electrotherapy",
+    requiresLock: false
+  },
+
+  // --- HIGH COMPLEXITY CATCH-22 TRAPS ---
+  {
+    id: "case-023",
+    title: "Febrile Joint Hydrarthrosis",
+    text: "Massive fluid accumulation in the knee capsule (deep target). However, the patient's core body temperature is currently 39.5°C with severe chills.",
+    targetModality: "Any",
+    requiresLock: true // Systemic fever is a massive contraindication
+  },
+  {
+    id: "case-024",
+    title: "Maternal Sciatica Flare",
+    text: "Intense sciatic nerve compression pain deep in the gluteal region. The patient is currently 28 weeks pregnant.",
+    targetModality: "Any",
+    requiresLock: true // Pregnancy is absolute contraindication for torso/pelvic therapies
+  },
+  {
+    id: "case-025",
+    title: "Undrained Purulent Osteomyelitis",
+    text: "Deep bone pain in the tibia caused by an enclosed, pus-forming infection. Antibiotics started, but no surgical drainage has occurred yet.",
+    targetModality: "Any",
+    requiresLock: true // Closed purulent infections explode under heat/stimulation
+  },
+  {
+    id: "case-026",
+    title: "Acute Hemarthrosis (Hemophilia)",
+    text: "Patient complains of deep joint ache in the shoulder. History reveals severe Hemophilia Type A, and the joint is actively filling with blood.",
+    targetModality: "Any",
+    requiresLock: true // Bleeding disorders + heat = catastrophy
+  },
+
+  // --- HIGH PRECISION TARGETING ---
+  {
+    id: "case-027",
+    title: "Subcutaneous Micro-Tears",
+    text: "Extremely superficial tendon micro-tears directly below the epidermis layer on the dorsal hand. Deep penetration is entirely unnecessary and wasteful.",
+    targetModality: "UHF Therapy",
+    targetFrequencyMin: 90, // Max superficiality needed
+    requiresLock: false
+  },
+  {
+    id: "case-028",
+    title: "Deep Acetabular Degeneration",
+    text: "Osteoarthritis occurring at the deepest point of the hip socket (acetabulum). Therapy must bypass massive superficial gluteal fat and muscle layers.",
+    targetModality: "Microwave Therapy",
+    targetFrequencyMax: 20, // Max depth needed
+    requiresLock: false
+  },
+  {
+    id: "case-029",
+    title: "Acute Radicular Syndrome",
+    text: "Patient has shooting pain from the deep lumbar spine down the leg. Due to the high acuity and hyperesthesia, thermal energy must be strictly avoided. Bio-stimulation required.",
+    targetModality: "Magnetotherapy",
+    requiresLock: false
+  },
+  {
+    id: "case-030",
+    title: "Refractory Phantom Limb Pain",
+    text: "Post-amputation patient complains of burning pain in a missing foot. No actual tissue to treat; requires direct neuromodulation at the nerve stump.",
+    targetModality: "Electrotherapy",
+    requiresLock: false
   }
 ];
 

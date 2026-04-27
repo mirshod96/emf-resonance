@@ -20,6 +20,17 @@ const io = new Server(httpServer, {
 const ROLES = ['Biophysicist', 'Clinical Strategist', 'Safety Expert'];
 const CLINICAL_CASES = require('./clinicalCases');
 
+let availableCases = [...CLINICAL_CASES];
+
+const getRandomUnusedCase = () => {
+  if (availableCases.length === 0) {
+    // If we run out of 30 cases, reshuffle
+    availableCases = [...CLINICAL_CASES];
+  }
+  const index = Math.floor(Math.random() * availableCases.length);
+  return availableCases.splice(index, 1)[0]; // Remove and return
+};
+
 // Store rooms state in memory
 const rooms = {};
 
@@ -43,7 +54,7 @@ io.on('connection', (socket) => {
     
     // Initialize room if it doesn't exist
     if (!rooms[roomCode]) {
-      const randomCase = CLINICAL_CASES[Math.floor(Math.random() * CLINICAL_CASES.length)];
+      const randomCase = getRandomUnusedCase();
       rooms[roomCode] = {
         players: [],
         availableRoles: [...ROLES],
