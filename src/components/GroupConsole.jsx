@@ -41,14 +41,27 @@ export const GroupConsole = () => {
       >
         {/* Header containing Patient Target Info */}
         <div className="col-span-1 xl:col-span-4 mb-4 bg-cybermed-slate/40 border border-t-[4px] border-t-cybermed-cyan border-cybermed-teal/30 rounded-2xl p-6 grid grid-cols-1 md:grid-cols-3 gap-6 backdrop-blur-md">
-          <div className="md:col-span-2">
+          <div className="md:col-span-2 space-y-3">
             <h1 className="text-xl font-bold text-cybermed-cyan tracking-wider mb-2 uppercase flex items-center gap-2">
               <Stethoscope className="w-5 h-5"/> 
               TARGET CLINICAL CASE: {clinicalCase?.title}
             </h1>
-            <p className="text-sm text-cybermed-teal leading-relaxed p-3 bg-black/40 rounded-lg border border-cybermed-slate">
+            <p className="text-sm text-cybermed-teal leading-relaxed p-3 bg-black/40 rounded-lg border border-cybermed-slate text-left">
                {clinicalCase?.text}
             </p>
+            
+            {clinicalCase && (clinicalCase.labs || clinicalCase.instrumental) && (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-3">
+                <div className="text-left text-xs bg-black/30 p-3 rounded-lg border border-cybermed-slate/50">
+                  <span className="text-cybermed-teal/50 uppercase tracking-widest block mb-1">Laboratory Data</span>
+                  <span className="text-white/80">{clinicalCase.labs || "Not ordered."}</span>
+                </div>
+                <div className="text-left text-xs bg-black/30 p-3 rounded-lg border border-cybermed-slate/50">
+                  <span className="text-cybermed-teal/50 uppercase tracking-widest block mb-1">Instrumental Tests</span>
+                  <span className="text-white/80">{clinicalCase.instrumental || "Not ordered."}</span>
+                </div>
+              </div>
+            )}
           </div>
           
           <div className="flex flex-col justify-center items-end">

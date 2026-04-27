@@ -114,7 +114,7 @@ export const RoleAssignment = () => {
         </div>
 
         {clinicalCase && (
-          <div className="mb-8 bg-black/60 border border-cybermed-slate rounded-xl p-5 shadow-inner text-left">
+          <div className="mb-4 bg-black/60 border border-cybermed-slate rounded-xl p-5 shadow-inner text-left">
             <h3 className="text-cybermed-cyan text-xs font-black mb-3 uppercase tracking-widest flex items-center gap-2">
               <FileText className="w-4 h-4"/> Clinical Case File
             </h3>
@@ -127,6 +127,19 @@ export const RoleAssignment = () => {
                 <span className="text-cybermed-teal/50 text-[10px] uppercase tracking-widest block mb-1">Patient History & Symptoms</span>
                 <p className="text-white/80 leading-relaxed text-sm bg-black/40 px-3 py-2 rounded border border-white/5">{clinicalCase.text}</p>
               </div>
+            </div>
+          </div>
+        )}
+
+        {clinicalCase && (clinicalCase.labs || clinicalCase.instrumental) && (
+          <div className="mb-8 grid grid-cols-1 md:grid-cols-2 gap-4 text-left">
+            <div className="bg-black/40 border border-cybermed-slate/50 p-4 rounded-xl">
+               <span className="text-cybermed-teal/50 text-[10px] uppercase tracking-widest block mb-2">Laboratory Data</span>
+               <p className="text-xs text-white/80 leading-relaxed">{clinicalCase.labs || "Not ordered."}</p>
+            </div>
+            <div className="bg-black/40 border border-cybermed-slate/50 p-4 rounded-xl">
+               <span className="text-cybermed-teal/50 text-[10px] uppercase tracking-widest block mb-2">Instrumental Tests</span>
+               <p className="text-xs text-white/80 leading-relaxed">{clinicalCase.instrumental || "Not ordered."}</p>
             </div>
           </div>
         )}

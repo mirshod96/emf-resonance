@@ -18,14 +18,15 @@ const io = new Server(httpServer, {
 });
 
 const ROLES = ['Biophysicist', 'Clinical Strategist', 'Safety Expert'];
-const CLINICAL_CASES = require('./clinicalCases');
+import { generateCases } from './caseGenerator.js';
 
-let availableCases = [...CLINICAL_CASES];
+// Generate 100 unique procedural cases at server start
+let availableCases = generateCases(100);
 
 const getRandomUnusedCase = () => {
   if (availableCases.length === 0) {
-    // If we run out of 30 cases, reshuffle
-    availableCases = [...CLINICAL_CASES];
+    // If we run out of 100 cases, generate a fresh batch of 100
+    availableCases = generateCases(100);
   }
   const index = Math.floor(Math.random() * availableCases.length);
   return availableCases.splice(index, 1)[0]; // Remove and return
